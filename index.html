@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Felicidades Pablo</title>
+<style>
+  :root{
+    --bg: #fdfdfb;
+    --card-bg: #ffffff;
+    --text: #2b2b2b;
+    --accent: #FF8228;
+    --accent-dark: #d96c1a;
+    --shadow: rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+  }
+
+  #modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  #modal-overlay.hidden { display: none; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  #modal-box {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 40px 30px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px var(--shadow);
+    animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  #modal-title {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--accent-dark);
+    margin: 0 0 18px 0;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+  }
+
+  #modal-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555;
+    margin: 0 0 28px 0;
+  }
+
+  .round-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(255,130,40,0.35);
+  }
+
+  .round-btn:hover {
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(217,108,26,0.45);
+  }
+
+  .round-btn:active {
+    transform: translateY(0px) scale(0.97);
+  }
+
+  #main-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px;
+    gap: 28px;
+  }
+
+  #header-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    text-align: center;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #carousel-wrapper {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  #carousel-track {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .carousel-card {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: 22px;
+    box-shadow: 0 14px 40px var(--shadow);
+    padding: 32px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+
+  .carousel-card .card-number {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .carousel-card .card-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--accent-dark);
+    line-height: 1.25;
+  }
+
+  .carousel-card .card-image-wrap {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f3f1ee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-card .card-image-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .carousel-card .card-image-placeholder {
+    color: #b8b3b3;
+    font-size: 0.95rem;
+    padding: 40px 20px;
+  }
+
+  .carousel-card .card-content {
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  #progress-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e0dcdc;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+
+  .dot.filled {
+    background: var(--accent);
+    transform: scale(1.2);
+  }
+
+  .card-enter {
+    animation: cardEnter 0.55s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  @keyframes cardEnter {
+    0% { opacity: 0; transform: translateX(60px) scale(0.9) rotate(3deg); }
+    100% { opacity: 1; transform: translateX(0) scale(1) rotate(0deg); }
+  }
+
+  .card-enter-back {
+    animation: cardEnterBack 0.55s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  @keyframes cardEnterBack {
+    0% { opacity: 0; transform: translateX(-60px) scale(0.9) rotate(-3deg); }
+    100% { opacity: 1; transform: translateX(0) scale(1) rotate(0deg); }
+  }
+
+  #empty-state-wrap {
+    width: 100%;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #empty-state {
+    color: #999;
+    font-size: 1.05rem;
+    padding: 20px;
+  }
+
+  #controls {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #prev-btn {
+    background: #f1eded;
+    color: var(--text);
+    box-shadow: none;
+  }
+  #prev-btn:hover {
+    background: #e5e0e0;
+  }
+  #prev-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  @media (max-width: 480px) {
+    #modal-title { font-size: 1.6rem; }
+    #header-title { font-size: 1.35rem; }
+    .carousel-card { padding: 24px 18px 22px; gap: 14px; }
+    .carousel-card .card-title { font-size: 1.4rem; }
+    .carousel-card .card-content { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h1 id="modal-title">FELICIDADES PABLOOO!!!!</h1>
+    <p id="modal-text">
+      Felices 23 años, en esta página encontrarás 23 cosas que siempre siempre siempre que veo me hacen pensar en ti, espero que te gusten (Las cosas cada vez salen en un orden diferente para que sea más entretenido)
+    </p>
+    <button class="round-btn" id="close-modal-btn">A ver qué piensa karín de mi...</button>
+  </div>
+</div>
+
+<div id="main-content">
+  <div id="header-title">23 cosas que me recuerdan a ti</div>
+
+  <div id="carousel-wrapper">
+    <div id="carousel-track">
+      <div id="empty-state-wrap">
+        <div id="empty-state">Dale al botón para que aparezca la primera cosa</div>
+      </div>
+    </div>
+
+    <div id="progress-dots"></div>
+
+    <div id="controls">
+      <button class="round-btn" id="prev-btn" disabled style="display:none;">← Anterior</button>
+      <button class="round-btn" id="next-btn">Mostrar cosa #1</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  const THINGS = [
+    { title: "Naruto",  image: "naruto.jpg", text: "Anime mítico que te ha gustado siempre, jugar al Naruto Shippuden en mi casa después del insti o en la tuya en las pijamadas..." },
+    { title: "Los pacmans y los memes de la grasa",  image: "memegrasaBien.jpg", text: "Es ver :v y pensar en ti, no tiene sentido. Y todo el tema de decir papu y demás, classic memes 2016-2017" },
+    { title: "Viajes de colegio",  image: "bristol.jpg", text: "Tengo muy, pero que muy buenos recuerdos del viaje a Bristol en concreto, pero cuando veo a niños así pequeños en un viaje con su clase pienso en ti :)" },
+    { title: "Música en español rollo rock, verbena, fiestas",  image: "extremoduro.jpg", text: "Es la música que más asocio a ti, de vez en cuando me sale alguna en Spotify y pienso 'A pablo esta canción seguro que le  gusta'" },
+    { title: "Cuarzo rosa",  image: "cuarzo_rosa.jpg", text: "En una excursión te pregunté como 9 veces qué tipo de piedra era una que había en el suelo y todas y cada una de las veces era cuarzo rosa, desde entonces me recuerda a ti" },
+    { title: "Overwatch",  image: "Overwatch.jpeg", text: "Videojuego mitiquísimo. Siempre te agradeceré y pensaré en ti por este poster que me trajiste de aquella convención a la que fuiste con Jaciel" },
+    { title: "Minecraft",  image: "minecraft.jpg", text: "Y para videojuegos míticos Minecraft, a ver para cuando montamos un server" },
+    { title: "Hombres con el pelo largo",  image: "pelolargo.jpg", text: "Simplemente eres tú. (Tú tienes el pelo mucho más cuidado que el de la foto)" },
+    { title: "El color naranja",  image: "naranja.jpg", text: "La verdad que en este la justificación es complicada, simplemente veo el color naranja y pienso en ti (Por eso el tema naranja de esta web)" },
+    { title: "Mapas", image: "mapa.jpg", text: "Pero no este, los de papel épicos que tienes tú (no encontré fotos decentes en Internet perdón)" },
+    { title: "Polytopia y Civilization", image: "polytopia.jpg", text: "Es tu estilo de videojuego, me recuerdan muchísimo a ti tanto estos como cualquier juego de crear civilizaciones y pelear contra otras. Fun fact esta categoría de juegos se llama 4X porque va de eXplorar, eXpandir, eXplotar y eXterminar" },
+    { title: "Una persona que cocina muy bien", image: "cocinar.jpg", text: "Pero no digo en un restaurante rollo chef, digo como en la foto, una persona en su casa que haga unos platos de putisima madre, ese eres tú y cada vez que veo a alguien que cocina así pienso en ti. La canción también me recuerda a ti" },
+    { title: "Inazuma Eleven", image: "inazuma.jpg", text: "Todos los días veo en mi corcho el dibujo que me hiciste de Axel y siempre que veo algo de Inazuma o a alguien hablando de ello me acuerdo de ti" },
+    { title: "Cocteleras", image: "coctelera.jpg", text: "No sé si será por aquella época que te dio por comprar una coctelera, pero tanto las cocteleras como los cócteles me recuerdan a ti" },
+    { title: "Dibujar en un pequeño cuaderno y con lápiz y mientras se está en el campo", image: "dibujar.jpg", text: "No sé por qué, pero es algo que asocio totalmente a ti, tanto por la parte del dibujo como por la parte del campo" },
+    { title: "Esa persona que toca una guitarra  con sus amigos", image: "guitarra.jpg", text: "Realmente no es algo que hayamos hecho muchas veces (solo 1), pero cuando en alguna peli o en alguna serie se ve esta escena yo pienso en ti como el que toca la guitarra" },
+    { title: "Casas de pueblo típicas/medio derruidas/en mal estado, pero habitables", image: "casa.jpg", text: "Imagino que hago esta asociación por la casa del Recuenco a la que fuimos en las fiestas. Obviamente no estaba derruida, pero como tenía la zona del garaje y tal, esa vibra me recuerdan a ti" },
+    { title: "Manny/manin", image: "manny.jpg", text: "Cuando una persona dice manin me acuerdo de ti y de aquella tarde de ruleta en la que fuimos el cliente 'manny'. Foto de manny el del diario de Greg, un duro si me preguntas" },
+    { title: "Los memes de esa 'ese amigo del grupo creando una palabra que va a usar todo el grupo durante mucho tiempo'", image: "palabra.jpg", text: "Panojas" },
+    { title: "El Seat León", image: "seat_leon.jpg", text: "Puntos extra si es en gris, pero en verdad en todos los colores me recuerda a ti" },
+    { title: "Personas explicando cosas en las excursiones", image: "guia.jpg", text: "Eres literalmente tú (y el de la foto también) todas las veces que vamos a alguna excursión y te sueltas alguna data o de la historia del sitio o de la geografía o porqué la vegetación está como está, momento TOP de la excursión" },
+    { title: "45 momos", image: "45momos.jpg", text: "45 momos un pack de Doritos y un montón de papus pros tirando Minecraft" },
+    { title: "Personas con los ojos verdes amarronados", image: "ojos.jpeg", text: "En verdad esta como alguna otra que he puesto es descripción de ti, pero cuando veo a otra persona con los ojos así también me acuerdo de ti así que por eso está en esta lista" }
+  ];
+
+  const TOTAL = THINGS.length;
+  const IDX_SIXTH = 5;
+  const IDX_SEVENTH = 6;
+
+  const AUDIOS = [
+    "naruto.mp3",
+    null, null, "extremoduro.mp3", null,
+    null, "minecraft.mp3", null, "naranja.mp3", null,
+    "polytopia.mp3", "tarantella.mp3", "inazuma.mp3", null, null,
+    null, null, null, null, null,
+    null,
+    "45momos.mp3",
+    null
+  ];
+
+  let currentAudio = null;
+
+  function playAudioFor(thingIndex){
+    try {
+      if (currentAudio){
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+      }
+      const src = AUDIOS[thingIndex];
+      if (!src) return;
+      currentAudio = new Audio(src);
+      currentAudio.loop = true;
+      currentAudio.addEventListener('error', () => console.warn('No se pudo cargar el audio:', src));
+      var p = currentAudio.play();
+      if (p && typeof p.catch === 'function') p.catch(function(err){ console.warn('Audio bloqueado:', src, err); });
+    } catch(err) {
+      console.warn('Error inesperado al reproducir audio:', err);
+    }
+  }
+
+  function stopAudio(){
+    if (currentAudio){
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+    }
+  }
+
+  function shuffle(array){
+    var arr = array.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function generateOrder(){
+    var order = shuffle(Array.from({length: TOTAL}, function(_, i){ return i; }));
+    var posSixth  = order.indexOf(IDX_SIXTH);
+    var posSeventh = order.indexOf(IDX_SEVENTH);
+    order.splice(Math.max(posSixth, posSeventh), 1);
+    order.splice(Math.min(posSixth, posSeventh), 1);
+    var insertPos = Math.floor(Math.random() * (order.length + 1));
+    order.splice(insertPos, 0, IDX_SIXTH, IDX_SEVENTH);
+    return order;
+  }
+
+  var order = generateOrder();
+  var currentStep = 0;
+  var lastGeneratedStep = 0;
+
+  var modalOverlay   = document.getElementById('modal-overlay');
+  var closeModalBtn  = document.getElementById('close-modal-btn');
+  var confettiCanvas = document.getElementById('confetti-canvas');
+  var carouselTrack  = document.getElementById('carousel-track');
+  var nextBtn        = document.getElementById('next-btn');
+  var prevBtn        = document.getElementById('prev-btn');
+  var dotsContainer  = document.getElementById('progress-dots');
+
+  /* --- CONFETTI --- */
+  var ctx = confettiCanvas.getContext('2d');
+  var confettiPieces = [];
+  var confettiAnimId = null;
+  var confettiSpawnInterval = null;
+
+  function resizeCanvas(){
+    confettiCanvas.width  = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  var confettiColors = ['#FF8228','#f6d186','#9fd8cb','#a6c8f0','#d9a6f0','#ffffff'];
+
+  function spawnConfettiPiece(){
+    confettiPieces.push({
+      x: Math.random() * confettiCanvas.width,
+      y: -10,
+      size: 6 + Math.random() * 6,
+      speedY: 1.5 + Math.random() * 2,
+      speedX: (Math.random() - 0.5) * 1.5,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 8,
+      color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+      shape: Math.random() > 0.5 ? 'rect' : 'circle'
+    });
+  }
+
+  function drawConfetti(){
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    for (var k = 0; k < confettiPieces.length; k++){
+      var p = confettiPieces[k];
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'rect'){
+        ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size/2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+      p.y += p.speedY;
+      p.x += p.speedX;
+      p.rotation += p.rotSpeed;
+    }
+    confettiPieces = confettiPieces.filter(function(p){ return p.y < confettiCanvas.height + 20; });
+    confettiAnimId = requestAnimationFrame(drawConfetti);
+  }
+
+  function startConfetti(){
+    confettiCanvas.style.display = 'block';
+    if (!confettiAnimId) confettiAnimId = requestAnimationFrame(drawConfetti);
+    for (var i = 0; i < 60; i++) spawnConfettiPiece();
+    if (!confettiSpawnInterval){
+      confettiSpawnInterval = setInterval(function(){
+        for (var i = 0; i < 3; i++) spawnConfettiPiece();
+      }, 300);
+    }
+  }
+
+  function stopConfetti(){
+    if (confettiSpawnInterval){ clearInterval(confettiSpawnInterval); confettiSpawnInterval = null; }
+    if (confettiAnimId){ cancelAnimationFrame(confettiAnimId); confettiAnimId = null; }
+    confettiPieces = [];
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiCanvas.style.display = 'none';
+  }
+
+  /* --- MODAL --- */
+  closeModalBtn.addEventListener('click', function(){
+    modalOverlay.classList.add('hidden');
+    stopConfetti();
+  });
+
+  /* --- CARRUSEL --- */
+  function renderDots(){
+    dotsContainer.innerHTML = '';
+    for (var i = 1; i <= lastGeneratedStep; i++){
+      var dot = document.createElement('div');
+      dot.className = 'dot' + (i === currentStep ? ' filled' : '');
+      dotsContainer.appendChild(dot);
+    }
+  }
+
+  function renderCard(direction){
+    carouselTrack.innerHTML = '';
+
+    if (currentStep === 0){
+      stopAudio();
+      var wrap = document.createElement('div');
+      wrap.id = 'empty-state-wrap';
+      var empty = document.createElement('div');
+      empty.id = 'empty-state';
+      empty.textContent = 'Dale al botón para que aparezca la primera cosa';
+      wrap.appendChild(empty);
+      carouselTrack.appendChild(wrap);
+      return;
+    }
+
+    var thingIndex = order[currentStep - 1];
+    playAudioFor(thingIndex);
+
+    var thing = THINGS[thingIndex];
+    var card  = document.createElement('div');
+    card.className = 'carousel-card ' + (direction === 'back' ? 'card-enter-back' : 'card-enter');
+
+    var number = document.createElement('div');
+    number.className = 'card-number';
+    number.textContent = 'Cosa ' + currentStep + ' de ' + TOTAL;
+
+    var title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = thing.title;
+
+    var imageWrap = document.createElement('div');
+    imageWrap.className = 'card-image-wrap';
+    if (thing.image){
+      var img = document.createElement('img');
+      img.src = thing.image;
+      img.alt = thing.title;
+      imageWrap.appendChild(img);
+    } else {
+      var placeholder = document.createElement('div');
+      placeholder.className = 'card-image-placeholder';
+      placeholder.textContent = 'Imagen pendiente';
+      imageWrap.appendChild(placeholder);
+    }
+
+    var content = document.createElement('div');
+    content.className = 'card-content';
+    content.textContent = thing.text;
+
+    card.appendChild(number);
+    card.appendChild(title);
+    card.appendChild(imageWrap);
+    card.appendChild(content);
+
+    carouselTrack.appendChild(card);
+  }
+
+  function updateButtons(){
+    prevBtn.disabled = lastGeneratedStep <= 0;
+    prevBtn.style.display = lastGeneratedStep <= 0 ? 'none' : 'inline-flex';
+
+    if ((currentStep === 0 || currentStep === 1) && lastGeneratedStep > 0){
+      prevBtn.textContent = 'Ir al final';
+    } else {
+      prevBtn.textContent = '← Anterior';
+    }
+
+    if (currentStep >= TOTAL){
+      nextBtn.textContent = 'Volver al inicio';
+    } else if (currentStep === 0){
+      nextBtn.textContent = 'Mostrar cosa #1';
+    } else {
+      nextBtn.textContent = 'Siguiente cosa →';
+    }
+  }
+
+  function goNext(){
+    if (currentStep >= TOTAL){
+      currentStep = 1;
+      order = generateOrder();
+      renderCard('forward');
+      renderDots();
+      updateButtons();
+      return;
+    }
+    currentStep++;
+    if (currentStep > lastGeneratedStep) lastGeneratedStep = currentStep;
+    renderCard('forward');
+    renderDots();
+    updateButtons();
+  }
+
+  function goPrev(){
+    if (lastGeneratedStep <= 0) return;
+    if (currentStep === 1 || currentStep === 0){
+      currentStep = lastGeneratedStep;
+    } else {
+      currentStep--;
+    }
+    renderCard('back');
+    renderDots();
+    updateButtons();
+  }
+
+  nextBtn.addEventListener('click', goNext);
+  prevBtn.addEventListener('click', goPrev);
+
+  /* --- SWIPE MÓVIL --- */
+  var touchStartX = 0, touchStartY = 0;
+
+  carouselTrack.addEventListener('touchstart', function(e){
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  carouselTrack.addEventListener('touchend', function(e){
+    var dX = e.changedTouches[0].screenX - touchStartX;
+    var dY = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dX) < 50) return;
+    if (Math.abs(dY) > 60) return;
+    dX < 0 ? goNext() : goPrev();
+  }, { passive: true });
+
+  /* --- INIT --- */
+  updateButtons();
+  startConfetti();
+
+})();
+</script>
+
+</body>
+</html>
